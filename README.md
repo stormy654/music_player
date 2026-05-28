@@ -3,7 +3,7 @@ Ein einfacher lokaler Musikdateienabspieler, mit rodio und ratatui
 
 ![Demo](demo.gif)
 
-Per Default sucht es in $HOME/.config/music_player/path nacht einem File, in dem der Path zum Öffnen steht, ein solches File könnte dann so aussehen :
+Per Default sucht es in $HOME/.config/music_player/path nach einem File, in dem der Path zum Öffnen steht, ein solches File könnte dann so aussehen :
 
 ```
 C:\Users\phili\Music
