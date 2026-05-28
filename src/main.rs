@@ -233,10 +233,10 @@ fn main() -> std::io::Result<()> {
                         }
                     },
                     crossterm::event::KeyCode::Char('w') => {
-                        player.set_volume(player.volume() + 0.1);
+                        player.set_volume((player.volume() + 0.1).clamp(0.0,5.0));
                     },
                     crossterm::event::KeyCode::Char('s') => {
-                        player.set_volume(player.volume() - 0.1);
+                        player.set_volume((player.volume() - 0.1).clamp(0.0,5.0));
                     },
                     crossterm::event::KeyCode::Char('h') => {
                         if depth == 0 {continue;}
