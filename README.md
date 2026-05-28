@@ -23,6 +23,7 @@ k     = geht im aktuellen dir nach oben
 j     = geht im aktuellen dir nach unten
 a     = spult 10s zurück
 k     = spult 10s nach vorne
+0..9  = springt zu z.B. Dauer * 0.3 
 w     = Volume hoch
 s     = Volume runter
 n     = geht zum nächsten Song in der Warteschlange
