@@ -411,9 +411,10 @@ fn main() -> std::io::Result<()> {
                         player.play();
                         clock = Clock::new();
                         clock.unpause();
-
+                        is_repeating = false;
                         }
                         is_random = !is_random;
+                        is_repeating = false;
                     },
                     crossterm::event::KeyCode::Char('r') => {
                         if !is_repeating{
