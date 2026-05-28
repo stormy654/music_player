@@ -27,6 +27,7 @@ k     = spult 10s nach vorne
 w     = Volume hoch
 s     = Volume runter
 n     = geht zum nächsten Song in der Warteschlange
+c     = cleare alle Songs in der Warteschlange
 q     = quit
 r     = toggle Repeat für den aktuellen Song
 space = toggle Pausiert
