@@ -1,1 +1,32 @@
 # music_player
+ein einfacher lokaler Musikdateienabspieler , mit rodio und ratatui
+
+![Demo](demo.gif)
+
+per Default sucht es in $HOME/.config/music_player/path nacht einem File in dem der Path zum öffnen steht ein solches file könnte dann so aussehen :
+
+```
+C:\Users\phili\Music
+
+```
+ansonsten kann man auch per argument des Path vorgeben:
+```
+music_player . //hier nimmt es das aktuelle dir
+```
+
+## Keybinds:
+```
+l     = geht in das ausgewählte dir
+h     = geht ein dir zurück
+o     = addiert den ausgewählten Song zur Warteschlange
+k     = geht im aktuellen dir nach oben
+j     = geht im aktuellen dir nach unten
+a     = spult 10s zurück
+k     = spult 10s nach vorne
+w     = Volume hoch
+s     = Volume runter
+n     = geht zum nächsten Song in der Warteschlange
+q     = quit
+r     = toggle Repeat für den aktuellen Song
+space = Pausiert
+```
