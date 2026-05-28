@@ -30,5 +30,6 @@ n     = geht zum nächsten Song in der Warteschlange
 c     = cleare alle Songs in der Warteschlange
 q     = quit
 r     = toggle Repeat für den aktuellen Song
+p     = toggles random play Mode for the dir under the Cursor
 space = toggle Pausiert
 ```

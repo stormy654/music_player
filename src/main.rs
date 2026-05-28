@@ -1,3 +1,4 @@
+#![allow(unused)]
 use std::collections::VecDeque;
 use rodio::*;
 use std::path::{PathBuf};
@@ -10,6 +11,8 @@ use ratatui::style::{Color, Modifier, Style, Stylize};
 use ratatui::widgets::{List,ListItem,Block, ListState};
 use ratatui::Frame;
 
+use rand::prelude::IndexedRandom; // rand 0.9
+                                  //
 pub const SKIPTIME:u64 = 10;
 
 pub struct Clock {
@@ -79,16 +82,11 @@ impl Csource {
 
 }
 fn main() -> std::io::Result<()> {
-
-
-
-    //let name = path.file_name().unwrap().to_str().unwrap();
     ratatui::run(| terminal| {
         let mut clock = Clock::new();
         let handle = DeviceSinkBuilder::open_default_sink().unwrap();
 
         let mut is_repeating  = false;
-
         let mut args = std::env::args();
 
         let config_path = format!("{}{}",std::env::home_dir().unwrap().as_os_str().to_str().unwrap(), "\\.config\\music_player\\path".to_owned());
@@ -107,15 +105,56 @@ fn main() -> std::io::Result<()> {
         let player = rodio::Player::connect_new(handle.mixer());
 
         let mut sources:VecDeque<Csource> = VecDeque::new();
+
         let mut depth = 0;
+
         let mut entries:Vec<DirEntry> =  fs::read_dir(path).unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e)).map(|x:Result<DirEntry,_>| x.unwrap()).filter(|x| !x.file_name().into_string().unwrap().contains(".ini")).collect();
         entries.sort_by_key(|b| std::cmp::Reverse(b.file_type().unwrap().is_dir()));
 
+        let mut random_dir:PathBuf = PathBuf::from(path);
+        let mut is_random = false;
+
         let mut lists:Vec<(ListState,Vec<DirEntry>)> = vec![(ListState::default(),entries)];
         lists[0].0.select(Some(0));
+
         loop {
             while sources.len() > player.len() { 
                 if !is_repeating { 
+            if is_random {
+                        if lists.is_empty() || lists[depth].1.is_empty() {continue;}
+
+                        let mut entries:Vec<DirEntry> =  fs::read_dir(&random_dir)
+                            .unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e))
+                            .map(|x:Result<DirEntry,_>| x
+                            .unwrap())
+                            .filter(|x| !x
+                                .file_name()
+                                .into_string()
+                                .unwrap()
+                                .contains(".ini") &&
+                                x.file_type().
+                                unwrap().
+                                is_file()
+                                )
+                            .collect();
+                        if entries.is_empty() {continue;}
+                        let entry = entries.choose(&mut rand::rng()).unwrap();
+
+                        let file = File::open(entry.path()).unwrap(); // TODO CLEANUP
+
+                        let source = if let Ok(p) = Decoder::try_from(file) {  // TODO CLEANUP
+                                p 
+                        }else{
+                            continue; 
+                        }; 
+                        sources.clear();
+                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        player.append(source); 
+                        clock = Clock::new();
+                        clock.unpause();
+
+            }
+            else {
                 sources.pop_front();
 
                 clock = Clock::new();
@@ -123,6 +162,9 @@ fn main() -> std::io::Result<()> {
                 if player.len() > 0 && !player.is_paused() {
                     clock.unpause();
                 }
+            }
+
+
                 }else { 
                  let file = File::open(&sources.front().unwrap().p).unwrap();
 
@@ -141,7 +183,7 @@ fn main() -> std::io::Result<()> {
                 }
             } 
 
-            terminal.draw(|frame | render(frame,&mut lists,depth,&sources,&mut clock,is_repeating,player.is_paused()))?;
+            terminal.draw(|frame | render(frame,&mut lists,depth,&sources,&mut clock,is_repeating,player.is_paused(),is_random))?;
 
 
 
@@ -278,16 +320,100 @@ fn main() -> std::io::Result<()> {
                         }else{
                             continue;
                         };
+                        is_random = false;
                         sources.push_back(Csource::new(item.file_name().into_string().unwrap(),source.total_duration().unwrap(),item.path()));
                         player.append(source);
 
                     },
                     crossterm::event::KeyCode::Char('n') => {
+                        if !is_random { 
                         player.skip_one();
                         sources.pop_front();
                         clock = Clock::new();
                         clock.unpause();
                         is_repeating = false;
+                        }else { 
+                            let mut entries:Vec<DirEntry> =  fs::read_dir(&random_dir)
+                            .unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e))
+                            .map(|x:Result<DirEntry,_>| x
+                            .unwrap())
+                            .filter(|x| !x
+                                .file_name()
+                                .into_string()
+                                .unwrap()
+                                .contains(".ini") &&
+                                x.file_type().
+                                unwrap().
+                                is_file()
+                                )
+                            .collect();
+                        if entries.is_empty() {continue;}
+                        let entry = entries.choose(&mut rand::rng()).unwrap();
+
+                        let file = File::open(entry.path()).unwrap(); // TODO CLEANUP
+
+                        let source = if let Ok(p) = Decoder::try_from(file) {  // TODO CLEANUP
+                                p 
+                        }else{
+                            continue; 
+                        }; 
+                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        player.clear();
+                        player.append(source); 
+                        player.play();
+                        clock = Clock::new();
+                        clock.unpause();
+
+
+                        }
+                    },
+                    crossterm::event::KeyCode::Char('p') => {
+                        if !is_random   {
+
+                        if lists.is_empty() || lists[depth].1.is_empty() {continue;}
+
+                        let idx = lists[depth].0.selected().unwrap();
+                        let item = &lists[depth].1[idx];
+
+                        let is_dir = item.file_type().unwrap().is_dir();
+                        if !is_dir {continue;}
+
+                        random_dir = item.path();
+
+                        let mut entries:Vec<DirEntry> =  fs::read_dir(&random_dir)
+                            .unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e))
+                            .map(|x:Result<DirEntry,_>| x
+                            .unwrap())
+                            .filter(|x| !x
+                                .file_name()
+                                .into_string()
+                                .unwrap()
+                                .contains(".ini") &&
+                                x.file_type().
+                                unwrap().
+                                is_file()
+                                )
+                            .collect();
+                        if entries.is_empty() {continue;}
+                        let entry = entries.choose(&mut rand::rng()).unwrap();
+
+                        let file = File::open(entry.path()).unwrap(); // TODO CLEANUP
+
+                        let source = if let Ok(p) = Decoder::try_from(file) {  // TODO CLEANUP
+                                p 
+                        }else{
+                            continue; 
+                        }; 
+                        sources.clear();
+                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        player.clear();
+                        player.append(source); 
+                        player.play();
+                        clock = Clock::new();
+                        clock.unpause();
+
+                        }
+                        is_random = !is_random;
                     },
                     crossterm::event::KeyCode::Char('r') => {
                         if !is_repeating{
@@ -327,6 +453,8 @@ fn main() -> std::io::Result<()> {
 
                     _ => {},
                 }
+
+
                 if !player.is_paused() {
                     clock.unpause();
                 }
@@ -336,7 +464,7 @@ fn main() -> std::io::Result<()> {
 
 
 }
-fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,sources:&VecDeque<Csource>,clock:&mut Clock,repeating:bool,paused:bool) {
+fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,sources:&VecDeque<Csource>,clock:&mut Clock,repeating:bool,paused:bool,random:bool) {
 
     let outermost = Layout::default()
         .direction(Direction::Vertical)
@@ -374,7 +502,7 @@ fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,s
             let mut ls = ListState::default();
             ls.select_next();
 
-            let color = if paused {Color::Red}else{if repeating  {Color::Yellow} else {Color::Blue}};
+            let color = if paused {Color::Red}else{if repeating  {Color::Yellow} else {if random {Color::Magenta}else { Color::Blue }}};
             let sources:Vec<&str> = sources.iter().map(|x| x.s.as_str()).collect();
             let list = List::new(sources)
                 .style(color)
