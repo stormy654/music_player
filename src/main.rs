@@ -108,7 +108,16 @@ fn main() -> std::io::Result<()> {
 
         let mut depth = 0;
 
-        let mut entries:Vec<DirEntry> =  fs::read_dir(path).unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e)).map(|x:Result<DirEntry,_>| x.unwrap()).filter(|x| !x.file_name().into_string().unwrap().contains(".ini")).collect();
+        let mut entries:Vec<DirEntry> =  fs::read_dir(path)
+            .unwrap_or_else(|e| panic!("couldn't read path {}: {}", path, e))
+            .map(|x:Result<DirEntry,_>| x
+                .unwrap())
+            .filter(|x| !x
+                .file_name()
+                .into_string()
+                .unwrap()
+                .contains(".ini"))
+            .collect();
         entries.sort_by_key(|b| std::cmp::Reverse(b.file_type().unwrap().is_dir()));
 
         let mut random_dir:PathBuf = PathBuf::from(path);
@@ -148,7 +157,13 @@ fn main() -> std::io::Result<()> {
                             continue; 
                         }; 
                         sources.clear();
-                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        sources
+                            .push_back(Csource::new(entry
+                                    .file_name()
+                                    .into_string()
+                                    .unwrap(),
+                                    source .total_duration() .unwrap(),
+                                    entry .path())); 
                         player.append(source); 
                         clock = Clock::new();
                         clock.unpause();
@@ -166,7 +181,11 @@ fn main() -> std::io::Result<()> {
 
 
                 }else { 
-                 let file = File::open(&sources.front().unwrap().p).unwrap();
+                 let file = File::open(&sources
+                     .front()
+                     .unwrap()
+                     .p)
+                     .unwrap();
 
                  let source = if let Ok(p) = Decoder::try_from(file) { 
                          p
@@ -294,8 +313,17 @@ fn main() -> std::io::Result<()> {
                         let new_path= lists[depth].1[idx].path();
                         let mut new_list_state = ListState::default();
                         new_list_state.select_next();
-                        let mut new_entries:Vec<DirEntry> =  fs::read_dir(new_path).unwrap().map(|x:Result<DirEntry,_>| x.unwrap()).collect(); 
-                        new_entries.sort_by_key(|b| std::cmp::Reverse(b.file_type().unwrap().is_dir()));
+                        let mut new_entries:Vec<DirEntry> =  fs::read_dir(new_path).
+                            unwrap()
+                            .map(|x:Result<DirEntry,_>| x
+                                .unwrap())
+                            .collect(); 
+
+                        new_entries.sort_by_key(|b| std::cmp::Reverse(b
+                                .file_type()
+                                .unwrap()
+                                .is_dir()));
+
                         lists.push((new_list_state,new_entries));
                         depth +=1;
                     },
@@ -310,7 +338,10 @@ fn main() -> std::io::Result<()> {
                         let idx = lists[depth].0.selected().unwrap();
                         let item = &lists[depth].1[idx];
 
-                        let is_file = item.file_type().unwrap().is_file();
+                        let is_file = item
+                            .file_type()
+                            .unwrap()
+                            .is_file();
                         if !is_file {continue;}
 
                         let file = File::open(item.path()).unwrap();
@@ -321,7 +352,12 @@ fn main() -> std::io::Result<()> {
                             continue;
                         };
                         is_random = false;
-                        sources.push_back(Csource::new(item.file_name().into_string().unwrap(),source.total_duration().unwrap(),item.path()));
+                        sources.push_back(Csource::new(item
+                                .file_name()
+                                .into_string()
+                                .unwrap(),
+                                source .total_duration() .unwrap(),
+                                item.path()));
                         player.append(source);
 
                     },
@@ -350,14 +386,20 @@ fn main() -> std::io::Result<()> {
                         if entries.is_empty() {continue;}
                         let entry = entries.choose(&mut rand::rng()).unwrap();
 
-                        let file = File::open(entry.path()).unwrap(); // TODO CLEANUP
+                        let file = File::open(entry.path()).unwrap();
 
-                        let source = if let Ok(p) = Decoder::try_from(file) {  // TODO CLEANUP
-                                p 
+                        let source = if let Ok(p) = Decoder::try_from(file) {
+                                p
                         }else{
                             continue; 
                         }; 
-                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        sources.clear();
+                        sources.push_back(Csource::new(entry
+                                .file_name()
+                                .into_string()
+                                .unwrap(),
+                                source .total_duration() .unwrap(),
+                                entry .path())); 
                         player.clear();
                         player.append(source); 
                         player.play();
@@ -405,7 +447,14 @@ fn main() -> std::io::Result<()> {
                             continue; 
                         }; 
                         sources.clear();
-                        sources.push_back(Csource::new(entry.file_name().into_string().unwrap(),source.total_duration().unwrap(),entry.path())); 
+                        sources.push_back(Csource::new(
+                                entry
+                                .file_name()
+                                .into_string()
+                                .unwrap(),
+                                source.total_duration().unwrap(),
+                                entry.path())); 
+
                         player.clear();
                         player.append(source); 
                         player.play();
