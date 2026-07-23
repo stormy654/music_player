@@ -604,5 +604,3 @@ fn render_list(frame:&mut Frame , area: Rect, list_state: &mut ListState,items:&
     frame.render_stateful_widget(list,area,list_state);
 
 }
-
-
