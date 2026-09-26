@@ -200,12 +200,9 @@ fn main() -> std::io::Result<()> {
                     (event::KeyCode::Char('u') , event::KeyModifiers::CONTROL)=>{
                         lists[depth].0.scroll_up_by(7);
                     },
-                    _ => {},
-                }
-                match   key.code  {
 
-                    crossterm::event::KeyCode::Char('q') => {break Ok(());},
-                    crossterm::event::KeyCode::Char('a') => {
+                    (crossterm::event::KeyCode::Char('q'),_) => {break Ok(());},
+                    (crossterm::event::KeyCode::Char('a'),_) => {
                         if   player.get_pos() > Duration::from_secs(SKIPTIME)   { 
                             let _ = player.try_seek(player.get_pos().saturating_sub (Duration::from_secs(SKIPTIME)));
                             clock.sub(Duration::from_secs(SKIPTIME));
@@ -214,91 +211,91 @@ fn main() -> std::io::Result<()> {
                             clock.set(Duration::from_secs(0));
                         }
                     },
-                    crossterm::event::KeyCode::Char('d') => {
+                    (crossterm::event::KeyCode::Char('d'),_) => {
                         let _ = player.try_seek(player.get_pos() + Duration::from_secs(SKIPTIME));
                         clock.add(Duration::from_secs(SKIPTIME));
                     },
-                    crossterm::event::KeyCode::Char('0') => {
+                    (crossterm::event::KeyCode::Char('0'),_) => {
                         if !sources.is_empty()  {
                             let _ = player.try_seek(Duration::from_secs(0));
                             clock.set(Duration::from_secs(0));
                         }
                     },
-                    crossterm::event::KeyCode::Char('1') => {
+                    (crossterm::event::KeyCode::Char('1'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.1);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('2') => {
+                    (crossterm::event::KeyCode::Char('2'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.2);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('3') => {
+                    (crossterm::event::KeyCode::Char('3'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.3);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('4') => {
+                    (crossterm::event::KeyCode::Char('4'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.4);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('5') => {
+                    (crossterm::event::KeyCode::Char('5'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.5);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('6') => {
+                    (crossterm::event::KeyCode::Char('6'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.6);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('7') => {
+                    (crossterm::event::KeyCode::Char('7'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.7);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('8') => {
+                    (crossterm::event::KeyCode::Char('8'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.8);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('9') => {
+                    (crossterm::event::KeyCode::Char('9'),_) => {
                         if !sources.is_empty()  {
                             let time = sources.front().unwrap().d.mul_f64(0.9);
                             let _ = player.try_seek(time);
                             clock.set(time);
                         }
                     },
-                    crossterm::event::KeyCode::Char('w') => {
+                    (crossterm::event::KeyCode::Char('w'),_) => {
                         player.set_volume((player.volume() + 0.1).clamp(0.0,5.0));
                     },
-                    crossterm::event::KeyCode::Char('s') => {
+                    (crossterm::event::KeyCode::Char('s'),_) => {
                         player.set_volume((player.volume() - 0.1).clamp(0.0,5.0));
                     },
-                    crossterm::event::KeyCode::Char('h') => {
+                    (crossterm::event::KeyCode::Char('h'),_) => {
                         if depth == 0 {continue;}
                         lists.remove(lists.len()-1);
                         depth -=1;
                     },
-                    crossterm::event::KeyCode::Char('l') => {
+                    (crossterm::event::KeyCode::Char('l'),_) => {
                         if lists[depth].1.is_empty()  {continue;}
                         let idx = lists[depth].0.selected().expect("TODO");
                         if lists[depth].1[idx].file_type().unwrap().is_file() {
@@ -319,13 +316,13 @@ fn main() -> std::io::Result<()> {
                         depth +=1;
                     },
 
-                    crossterm::event::KeyCode::Char('j') => {
+                    (crossterm::event::KeyCode::Char('j'),_) => {
                         lists[depth].0.select_next();
                     },
-                    crossterm::event::KeyCode::Char('k') => {
+                    (crossterm::event::KeyCode::Char('k'),_) => {
                         lists[depth].0.select_previous();
                     },
-                    crossterm::event::KeyCode::Char('o') => {
+                    (crossterm::event::KeyCode::Char('o'),_) => {
                         if lists.is_empty() || lists[depth].1.is_empty() {continue;}
                         let idx = lists[depth].0.selected().unwrap();
                         let item = &lists[depth].1[idx];
@@ -353,7 +350,7 @@ fn main() -> std::io::Result<()> {
                         player.append(source);
 
                     },
-                    crossterm::event::KeyCode::Char('n') => {
+                    (crossterm::event::KeyCode::Char('n'),_) => {
                         if !is_random { 
                             player.skip_one();
                             sources.pop_front();
@@ -388,7 +385,7 @@ fn main() -> std::io::Result<()> {
 
                         }
                     },
-                    crossterm::event::KeyCode::Char('p') => {
+                    (crossterm::event::KeyCode::Char('p'),_) => {
                         if !is_random   {
 
                             if lists.is_empty() || lists[depth].1.is_empty() {continue;}
@@ -402,7 +399,7 @@ fn main() -> std::io::Result<()> {
                             random_dir = item.path();
 
 
-                            let entries:Vec<DirEntry> =  read_all_files_recursive(&random_dir); // TODO recursiv hier angewandt
+                            let entries:Vec<DirEntry> =  read_all_files_recursive(&random_dir); 
 
                             if entries.is_empty() {continue;}
                             let entry = entries.choose(&mut rand::rng()).unwrap();
@@ -433,7 +430,7 @@ fn main() -> std::io::Result<()> {
                         is_random = !is_random;
                         is_repeating = false;
                     },
-                    crossterm::event::KeyCode::Char('r') => {
+                    (crossterm::event::KeyCode::Char('r'),_) => {
                         if !is_repeating{
                             if sources.is_empty() {continue;}
 
@@ -452,13 +449,13 @@ fn main() -> std::io::Result<()> {
                         }
                         is_repeating = !is_repeating;
                     },
-                    crossterm::event::KeyCode::Char('c') => {
+                    (crossterm::event::KeyCode::Char('c'),_) => {
                         player.clear();
                         sources = VecDeque::new();
                         clock = Clock::new();
                         is_repeating = false;
                     },
-                    crossterm::event::KeyCode::Char(' ') => {
+                    (crossterm::event::KeyCode::Char(' '),_) => {
                         if player.is_paused() {
                             player.play();
                             clock.unpause();
