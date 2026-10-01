@@ -194,6 +194,13 @@ fn main() -> std::io::Result<()> {
             if event::poll(Duration::from_millis(16))? && let crossterm::event::Event::Key(key) = event::read()? && key.kind == crossterm::event::KeyEventKind::Press {
 
                 match (key.code , key.modifiers){
+                    // large movement
+                    (event::KeyCode::Char('G') , _)=>{
+                        lists[depth].0.select_last();
+                    },
+                    (event::KeyCode::Char('g') , _)=>{
+                        lists[depth].0.select_first();
+                    },
                     (event::KeyCode::Char('d') , event::KeyModifiers::CONTROL)=>{
                         lists[depth].0.scroll_down_by(7);
                     },
