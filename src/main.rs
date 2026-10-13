@@ -10,9 +10,9 @@ use std::time::{ Duration , Instant };
 
 use crossterm::event;
 
-use ratatui::layout::{Constraint,Direction, Layout, Rect,Alignment};
+use ratatui::layout::{  Constraint,Direction, Layout, Rect,Alignment};
 use ratatui::style::{Color, Modifier, Style, Stylize};
-use ratatui::widgets::{List,ListItem,Block, ListState};
+use ratatui::widgets::{Borders , Paragraph, List,ListItem,Block, ListState};
 use ratatui::Frame;
 
 use rand::prelude::IndexedRandom; // rand 0.9
@@ -188,7 +188,7 @@ fn main() -> std::io::Result<()> {
                 }
             } 
 
-            terminal.draw(|frame | render(frame,&mut lists,depth,&sources,&mut clock,is_repeating,player.is_paused(),is_random))?;
+            terminal.draw(|frame | render(frame,&mut lists,depth,&sources,&mut clock,is_repeating,player.is_paused(),is_random,player.volume()))?;
 
 
             if event::poll(Duration::from_millis(16))? && let crossterm::event::Event::Key(key) = event::read()? && key.kind == crossterm::event::KeyEventKind::Press {
@@ -486,7 +486,7 @@ fn main() -> std::io::Result<()> {
 
 
 }
-fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,sources:&VecDeque<Csource>,clock:&mut Clock,repeating:bool,paused:bool,random:bool) {
+fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,sources:&VecDeque<Csource>,clock:&mut Clock,repeating:bool,paused:bool,random:bool,volume:f32) {
 
     let outermost = Layout::default()
         .direction(Direction::Vertical)
@@ -518,9 +518,27 @@ fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,s
                 Constraint::Percentage(75),
                 Constraint::Percentage(25)
             ]).split(outermost[0]);
-            let block  = Block::bordered().title_alignment(Alignment::Center).title("Player".bold().italic());
+        let player_vol = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Percentage(90),
+                Constraint::Percentage(10)
+            ]).split(outer[1]);
 
-            frame.render_widget(&block,outer[1]);
+            let player_block  = Block::bordered().title_alignment(Alignment::Center).title("Player".bold().italic());
+            let vol_block = Paragraph::new(format!("{:.1}",volume))
+                .style(Style::default()).fg(Color::White)
+                .alignment(Alignment::Center)
+                .block(
+                    Block::default()
+                    .borders(Borders::ALL)
+                    .title("Volume")
+                    .title_alignment(Alignment::Center)
+                );
+
+            frame.render_widget(&player_block,player_vol[0]);
+            frame.render_widget(&vol_block,player_vol[1]);
+
             let mut ls = ListState::default();
             ls.select_next();
 
@@ -530,11 +548,10 @@ fn render(frame: &mut Frame, lists:&mut[(ListState,Vec<DirEntry>)],depth:usize,s
                 .style(color)
                 .highlight_style(Modifier::REVERSED)
                 .highlight_symbol("");
-    frame.render_stateful_widget(list,block.inner(outer[1]),&mut ls);
+    frame.render_stateful_widget(list,block.inner(player_vol[0]),&mut ls);
 
 
     let constraints = vec!(Constraint::Fill(1);depth + 1);
-    //constraints.push(Constraint::Fill(5)); //TODO minimal auf 55 % runter gehtt das?
 
     let layout = Layout::default()
         .direction(Direction::Horizontal)
